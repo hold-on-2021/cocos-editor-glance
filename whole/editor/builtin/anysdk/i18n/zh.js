@@ -1,0 +1,1 @@
+"use strict";const Fs=require("fs"),Path=require("path");var root=Path.join(__dirname,"../panel/i18n"),files=Fs.readdirSync(root);files.forEach(r=>{var e=Path.extname(r);r=r.replace(e,"");var a=Path.join(root,r);exports[r]=require(a).zh});

@@ -1,0 +1,1 @@
+(()=>{"use strict";return{dependencies:["packages://inspector/share/meta-header.js"],template:'\n      <cc-meta-header\n        :target="target"\n        icon="unpack://static/icon/assets/prefab.png"\n      ></cc-meta-header>\n      \n      <ui-prop :name="T(\'INSPECTOR.scene.async_load_assets\')" type="boolean" v-value="target.asyncLoadAssets"></ui-prop>\n    '}})();

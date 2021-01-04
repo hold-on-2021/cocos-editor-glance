@@ -1,0 +1,191 @@
+<dom-module id="app-new" >
+  <link rel="import" type="css" href="styles/app-new.css">
+
+  <template>
+    <div class="template-list">
+      <iron-selector id="selector"
+        selected="0"
+        selected-class="selected"
+        on-selected-changed="_onSelectedChanged"
+      >
+        <template id="list" is="dom-repeat" items="{{infos}}">
+          <div class="template layout vertical">
+            <div class="logo">
+              <img src$="{{item.banner}}"></img>
+            </div>
+            <div class="name">
+              <div>{{item.name}}</div>
+            </div>
+          </div>
+        </template>
+      </iron-selector>
+    </div>
+    <div class="description layout vertical left">
+      <div class="text flex-1">{{description}}</div>
+      <div class="flex-2 layout horizontal center">
+        <div class="browse flex-3 layout horizontal">
+          <dashboard-button id="browseBtn" class="flat small" on-click="_onBrowse">[[_T('DASHBOARD.browse')]]...</dashboard-button>
+          <input class="flex-2" id="pathInput" is="iron-input" bind-value="{{path}}">
+        </div>
+        <div class="action flex-1">
+          <dashboard-button class="flat" on-click="_onCreate">[[_T('DASHBOARD.create')]]</dashboard-button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const Electron = require('electron');
+
+      const Path = require('fire-path');
+      const _ = require('lodash');
+      const ipcRenderer = Electron.ipcRenderer;
+
+      Polymer({
+        is: 'app-new',
+
+        properties: {
+        },
+
+        ready () {
+          this.updateTemplateInfos();
+
+          let basePath = Dashboard.userHome;
+          if ( Dashboard._lastCreate ) {
+            basePath = Path.dirname(Dashboard._lastCreate);
+          }
+          this.path = Path.join( basePath, 'NewProject' );
+          ipcRenderer.on( 'dashboard:refresh-last-create', (event) => {
+            window.Dashboard._lastCreate = Editor.Ipc.sendToMainSync('app:get-last-create');
+          });
+        },
+
+        _T: function (text_id) {
+          return Editor.T(text_id);
+        },
+
+        reset () {
+          this.$.selector.select(0);
+
+          let basePath = Dashboard.userHome;
+          if ( Dashboard._lastCreate ) {
+            basePath = Path.dirname(Dashboard._lastCreate);
+          }
+          this.path = Path.join( basePath, 'NewProject' );
+          this.focusInput();
+        },
+
+        updateTemplateInfos () {
+          let infos = [{
+            name: Editor.T('DASHBOARD.template_empty'),
+            desc: Editor.T('DASHBOARD.template_empty_desc'),
+            banner: 'static/img/empty-project.png'
+          }];
+
+          Editor.Ipc.sendToMain( 'app:query-templates', (err, tmplInfos) => {
+            if ( err ) {
+              console.log(err);
+            }
+            this.infos = _.sortBy(infos.concat(tmplInfos), info => {
+              if (info.banner.indexOf('hello-world') !== -1) {
+                return 0;
+              } else {
+                return 2;
+              }
+            });
+          });
+        },
+
+        focusInput () {
+          this.async(() => {
+            let projectName = Path.basenameNoExt(this.path);
+            this.$.pathInput.focus();
+            this.$.pathInput.setSelectionRange(
+              this.path.length-projectName.length,
+              this.path.length
+            );
+          });
+        },
+
+        _onSelectedChanged ( event ) {
+          let itemEL = Polymer.dom(this.$.selector).children[event.detail.value];
+          let model = this.$.list.modelForElement(itemEL);
+          if ( model ) {
+            this.set('description', model.item.desc);
+          }
+        },
+
+        _onBrowse ( event ) {
+          event.stopPropagation();
+
+          Editor.UI.addLoadingMask({
+            background: 'rgba(0,0,0,0.5)',
+          });
+
+          const dialog = Electron.remote.dialog;
+
+          let result = dialog.showOpenDialog ( {
+            title: Editor.T('DASHBOARD.choose_project'),
+            properties: [ 'openDirectory', 'createDirectory' ]
+          } );
+
+          if ( result ) {
+            this.path = Path.join( result[0], 'NewProject' );
+            this.focusInput();
+          }
+
+          Editor.UI.removeLoadingMask();
+        },
+
+        _onBack ( event ) {
+          this.fire('back');
+        },
+
+        _onCreate ( event ) {
+          let projectName = Path.basenameNoExt(this.path);
+          let dirName = Path.dirname(this.path);
+          let re = /^[_a-z0-9-]+$/ig;
+          if (!re.test(projectName)) {
+            this.fire( 'status-changed', {
+              type: 'error',
+              status: Editor.T('DASHBOARD.invalid_project_name')
+            });
+            return;
+          }
+
+          let reDir = null;
+          if (process.platform === 'win32') {
+            reDir = /^[a-z]:\\[_a-z0-9-\\]*$/ig;
+          } else {
+            reDir = /^\/[_a-z0-9-\/]+$/ig;
+          }
+          if (!reDir.test(dirName)) {
+            this.fire( 'status-changed', {
+              type: 'error',
+              status: Editor.T('DASHBOARD.invalid_project_path')
+            });
+            return;
+          }
+
+          let itemEL = this.$.selector.selectedItem;
+          let model = this.$.list.modelForElement(itemEL);
+
+          Editor.Ipc.sendToMain( 'app:create-project', {
+            path: this.path,
+            template: model.item.path,
+          }, err => {
+            if ( err ) {
+              this.fire( 'status-changed', {
+                type: 'error',
+                status: err.message,
+              } );
+            }
+          });
+        },
+      });
+    })();
+  </script>
+</dom-module>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AnySDK</title>
+    <script type="text/javascript" src="app://bower_components/vue/dist/vue.js"></script>
+    <link href="style/main.css" rel="stylesheet">
+</head>
+<body>
+    <div hidden>
+        <img src="./images/animation/runningGirl1.png" />
+        <img src="./images/animation/runningGirl2.png" />
+        <img src="./images/animation/runningGirl3.png" />
+        <img src="./images/animation/runningGirl4.png" />
+        <img src="./images/animation/runningGirl5.png" />
+        <img src="./images/animation/runningGirl6.png" />
+        <img src="./images/animation/runningGirl7.png" />
+        <img src="./images/animation/runningGirl8.png" />
+    </div>
+    <div id="content">
+        <header-nav
+            :tab="tab"
+            :platform="platform"
+        ></header-nav>
+
+        <game-list
+            :ready="ready"
+            v-if="tab == 'game-list'"
+            :platform="platform"
+        ></game-list>
+
+        <add-game
+            :ready="ready"
+            v-if="tab == 'add-game'"
+            :platform="platform"
+        ></add-game>
+
+        <version-manager
+            :ready="ready"
+            v-if="tab == 'version-manager'"
+        ></version-manager>
+
+        <settings
+            :ready="ready"
+            v-if="tab == 'settings'"
+        ></settings>
+
+        <configuration
+            :platform="platform"
+            :game="game"
+        ></configuration>
+
+        <pack
+            :platform="platform"
+            :game="game"
+        ></pack>
+
+        <!-- 跑步动画 -->
+        <div class="girl-animation"
+            v-if="waiting"
+            :mask="waiting.mask"
+        >
+            <div class="girl"></div>
+            <div class="info">
+                {{waiting.info}}
+            </div>
+        </div>
+
+        <!-- 信息提示窗口 -->
+        <div class="message"
+            v-if="message"
+            v-on:click="_onClickMessage"
+        >
+            <div class="win">
+                <div class="icon success"
+                    v-if="message.type == 'success'"
+                ></div>
+                <div class="icon error"
+                    v-if="message.type == 'error'"
+                ></div>
+                <div class="icon warn"
+                    v-if="message.type == 'warn'"
+                ></div>
+                <div class="info">
+                    {{message.info}}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 警告/提醒弹窗 -->
+        <div class="warn-message"
+            v-if="warn"
+        >
+
+            <div class="win">
+                <div class="warn-title">
+                    {{warn.info == 'warn' ? '警告' : '提醒'}}
+                    <i class="fa fa-times"
+                        v-on:click="_onCloseWarn"
+                    ></i>
+                </div>
+                <div class="warn-info">
+                    <table>
+                        <td>{{warn.info}}</td>
+                    </table>
+                </div>
+                <div class="warn-input"
+                    v-if="warn.check"
+                >
+                    <span>请输入 {{warn.check}} 确认</span>
+                    <input 
+                        v-on:input="_onWarnCheckChanged"
+                    />
+                </div>
+                <div class="warn-button">
+                    <div
+                        v-for="item in warn.buttons"
+                        v-on:click="!(item.check && warn.input != warn.check) && item.callback()"
+                        :disable="item.check && warn.input != warn.check"
+                    >{{item.text}}</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="script/boot.js"></script>
+</body>
+</html>

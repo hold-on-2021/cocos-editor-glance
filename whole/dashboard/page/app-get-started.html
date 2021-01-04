@@ -1,0 +1,37 @@
+<dom-module id="app-get-started" >
+  <style>
+    :host {
+      @apply(--layout-horizontal);
+      margin-left:0;
+      margin-top:20px;
+    }
+
+  </style>
+
+  <template>
+
+    <template is="dom-if" if="[[_isEn]]">
+      <div>
+        <iframe id="video-get-started" width="1024" height="480" src="https://www.youtube.com/embed/8U9Ojc8Babc" frameborder="0" allowfullscreen="false"></iframe>
+      </div>
+    </template>
+
+    <template is="dom-if" if="[[_isZh]]">
+      <div>
+        <iframe id="video-get-started" width="1024" height="480" src="http://player.youku.com/embed/XOTI2MTU3MjE2" frameborder="0" allowfullscreen="false"></iframe>
+      </div>
+    </template>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'app-get-started',
+
+      ready: function () {
+        // this._ver = Editor.remote.versions['fireball'];
+        this._isZh = Editor.lang === 'zh';
+        this._isEn = Editor.lang === 'en';
+      },
+    });
+  </script>
+</dom-module>

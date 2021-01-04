@@ -1,0 +1,22 @@
+<dom-module id="app-play-buttons" >
+  <link rel="import" type="css" href="app-play-buttons.css">
+  <template>
+    <div id="platforms" class="layout horizontal center">
+      <ui-select value="{{platform::confirm}}">
+        <template is="dom-repeat" items="{{platformList}}">
+          <option value="[[item.value]]">[[_T(item.text)]]</option>
+        </template>
+      </ui-select>
+    </div>
+
+    <div id="play" title="[[_T('EDITOR_MAIN.play_button')]]" class="btn" on-click="_onPlayClick">
+      <i class="fa fa-play"></i>
+    </div>
+
+    <div id="reload" title="[[_T('EDITOR_MAIN.reload_button')]]" class="btn" on-click="_onReloadClick">
+      <i class="fa fa-rotate-right"></i>
+    </div>
+  </template>
+
+  <script type="text/javascript" src="app-play-buttons.js"></script>
+</dom-module>

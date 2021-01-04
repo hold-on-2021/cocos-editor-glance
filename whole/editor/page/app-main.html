@@ -1,0 +1,32 @@
+<link rel="import" href="app-top-bar.html">
+<link rel="import" href="app-status-bar.html">
+<script type="text/javascript">
+  Editor.require('app://editor/page/scene-utils');
+</script>
+<link rel="import" href="app://share/login/renderer/login-panel.html">
+
+<dom-module id="app-main" >
+  <template>
+    <style>
+      :host {
+        @apply(--layout-fit);
+        @apply(--layout-vertical);
+
+        cursor: default;
+        margin: 3px;
+      }
+
+      .main-dock {
+        position: relative;
+      }
+    </style>
+
+    <app-top-bar id="tools"></app-top-bar>
+    <ui-main-dock class="flex-1"></ui-main-dock>
+    <app-status-bar id="status"></app-status-bar>
+
+    <login-panel id="loginPanel" style="z-index: 1998;"></login-panel>
+  </template>
+
+  <script type="text/javascript" src="app-main.js"></script>
+</dom-module>

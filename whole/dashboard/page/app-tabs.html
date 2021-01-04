@@ -1,0 +1,32 @@
+<dom-module id="app-tabs" >
+  <link rel="import" type="css" href="styles/app-tabs.css">
+
+  <template>
+    <iron-selector class="layout horizontal start-justified"
+      selected="0"
+      selected-class="selected"
+      on-selected-changed="_onSelectedChanged"
+    >
+      <content></content>
+    </iron-selector>
+  </template>
+
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'app-tabs',
+
+      _onSelectedChanged ( event ) {
+        this.fire('select', {
+          index: event.detail.value
+        });
+      },
+
+      selectTab (index) {
+        this.$$('iron-selector').select(index);
+      }
+
+    });
+  </script>
+</dom-module>

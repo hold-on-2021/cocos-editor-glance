@@ -1,0 +1,90 @@
+<html>
+  <head>
+  <title>Cocos Creator</title>
+  <script data-pace-options='{ "ajax": false, "restartOnPushState": false, "restartOnRequestAfter": false }' src="app://bower_components/pace/pace.js"></script>
+  <link href="static/css/pace-theme-center-simple.css" rel="stylesheet">
+  <script type="text/javascript" src="app://bower_components/vue/dist/vue.js"></script>
+  <script type="text/javascript">
+    Vue.config.devtools = false;  // hide log of "Vue Devtools"
+  </script>
+
+  <script type="text/javascript" src="app://bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <link rel="import" href="app://bower_components/polymer/polymer.html">
+  <link rel="import" href="app://bower_components/iron-flex-layout/iron-flex-layout.html">
+  <link rel="stylesheet" href="app://bower_components/fontawesome/css/font-awesome.min.css">
+  <style>
+    @font-face {
+      font-family: 'SourceHanSansCN-Normal';
+      src: url('unpack://static/fonts/SourceHanSansCN-Normal.otf');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    #launch-page {
+      z-index: 1999;
+      font-family: "Microsoft YaHei",Helvetica,Arial,sans-serif;
+      background-color: #363d42;
+    }
+    #launch-page .logo {
+      margin: auto;
+      margin-top: -100px;
+    }
+    #launch-page .status {
+      font-size: 16px;
+      margin: auto;
+      margin-top: 20px;
+      white-space: nowrap;
+
+      color: rgb(220,225,229);
+    }
+    #launch-page .copyright {
+      font-size: 12px;
+      margin: 0 auto 5px;
+
+      color: rgb(104,104,104);
+    }
+    #launch-page .copyright span {
+      color: rgb(255,255,255);
+    }
+  </style>
+
+  <style>
+    body, input, textarea, keygen, select, button {
+      font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, 'Lucida Grande', 'Segoe UI', Ubuntu, Cantarell, 'SourceHanSansCN-Normal', Arial, sans-serif;
+    }
+  </style>
+
+  <script src="page/index.js"></script>
+  <link rel="import" href="page/app-main.html">
+  </head>
+
+  <body class="layout vertical">
+  <div id="launch-page" class="layout vertical fit">
+    <span class="flex-1"></span>
+    <img class="logo" src="static/img/logo-with-text.png"/>
+    <div class="status">
+      <script>
+        document.write(Editor.T('EDITOR_MAIN.loading') + '...');
+      </script>
+    </div>
+    <span class="flex-1"></span>
+    <div class="copyright">
+      &copy 2018 Xiamen Yaji All rights reserved. <span>Privacy Policy</span>
+    </div>
+  </div>
+
+  <app-main></app-main>
+
+  <script>
+    // NOTE: put mectrics in ignore to prevent pending of them when network was bad
+    Pace.ignore( function () {
+    });
+
+    Pace.once( 'hide', function () {
+      var launchPage = document.getElementById('launch-page');
+      launchPage.remove();
+      Editor.Ipc.sendToAll('editor:ready');
+    });
+  </script>
+  </body>
+</html>

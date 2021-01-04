@@ -1,0 +1,1 @@
+let sharpPath;sharpPath=Editor.dev?"sharp":Editor.url("unpack://utils/sharp"),module.exports=require(sharpPath);

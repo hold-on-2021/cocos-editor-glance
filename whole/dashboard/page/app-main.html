@@ -1,0 +1,188 @@
+<link rel="import" href="packages://ui-kit/widget/loader/loader.html">
+<link rel="import" href="app://share/login/renderer/login-panel.html">
+
+<link rel="import" href="app://bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="app://bower_components/iron-input/iron-input.html">
+<link rel="import" href="button/button.html">
+
+<link rel="import" href="app-navbar.html">
+<link rel="import" href="app-tabs.html">
+<link rel="import" href="app-recent.html">
+<link rel="import" href="app-new.html">
+<link rel="import" href="app-help.html">
+
+<dom-module id="app-main" >
+  <link rel="import" type="css" href="styles/app-main.css">
+  <template>
+    <div id="window-row" class="layout horizontal">
+      <div class="flex-1 window-title layout horizontal start-justified">
+        <img height="30px" src="../static/img/logo_white.png">[[_T('DASHBOARD.title')]]</div>
+      <div class="flex-1 window-control layout horizontal end-justified">
+        <div class="layout horizontal">
+          <dashboard-button class="square" on-click="_onMinimize"><img src="../static/img/ctrl-windows-min.png"></dashboard-button>
+          <dashboard-button class="square" disabled><img src="../static/img/ctrl-windows-max.png"></dashboard-button>
+          <dashboard-button class="square" on-click="_onClose"><img src="../static/img/ctrl-windows-close.png"></dashboard-button>
+        </div>
+      </div>
+    </div>
+    <div id="content" class="layout vertical flex-2">
+      <div id="tab-row" class="layout horizontal">
+        <app-tabs id="appTabs" class="flex-1" on-select="_onSelect">
+          <div>[[_T('DASHBOARD.recent_project')]]</div>
+          <div>[[_T('DASHBOARD.new_project')]]</div>
+          <div>[[_T('DASHBOARD.open_other')]]...</div>
+          <div>[[_T('SHARED.help')]]</div>
+        </app-tabs>
+        <app-navbar class="layout horizontal end-justified"></app-navbar>
+      </div>
+
+      <div id="view" class="flex-2">
+        <div hidden$="[[!_recentProject(curIndex)]]">
+          <app-recent></app-recent>
+        </div>
+        <div hidden$="[[!_newProject(curIndex)]]">
+          <app-new id="appNew"></app-new>
+        </div>
+        <div class="help layout vertical" hidden$="[[!_help(curIndex)]]">
+          <app-help></app-help>
+        </div>
+        <div class="get-started layout vertical" hidden$="[[!_getStarted(curIndex)]]">
+          <app-get-started></app-get-started>
+        </div>
+      </div>
+
+      <div hidden$="[[!_recentProject(curIndex)]]" id="project-path">{{projectPath}}</div>
+
+      <login-panel id="loginPanel" style="z-index: 1998;"></login-panel>
+    </div>
+    <div id="status" class$={{statusType}}>{{status}}</div>
+  </template>
+
+  <script type="text/javascript">
+    (() => {
+      'use strict';
+
+      const Electron = require('electron');
+
+      Polymer({
+        is: 'app-main',
+
+        listeners: {
+          'status-changed': '_onStatusChanged',
+          'project-changed': '_onProjectChanged',
+          'tab-changed': '_onTabChanged',
+        },
+
+        ready () {
+          this.curIndex = 0;
+          this.status = '';
+          this.statusType = 'normal';
+          this.projectPath = '';
+
+          this.$.loginPanel.hidden = !Editor.requireLogin;
+        },
+
+        _T: function (text_id) {
+          return Editor.T(text_id);
+        },
+
+        _onSelect ( event ) {
+          this.curIndex = event.detail.index;
+
+          // new project
+          if ( this.curIndex === 1 ) {
+            this.$.appNew.reset();
+            return;
+          }
+
+          // open others
+          if ( this.curIndex === 2 ) {
+            const dialog = Electron.remote.dialog;
+
+            let result = dialog.showOpenDialog ( {
+              title: Editor.T('DASHBOARD.choose_project'),
+              properties: [ 'openDirectory' ]
+            } );
+
+            if ( result ) {
+              Editor.Ipc.sendToMain('app:open-project', result[0], err => {
+                if (err) {
+                  this.fire( 'status-changed', {
+                    type: 'error',
+                    status: err.message,
+                  } );
+                  if (err.message.indexOf('timeout') === -1) {
+                    this._resetFromBrowse(err.message);
+                  }
+                }
+              });
+            } else {
+              // jump back to help if cancel from browse project dialog
+              this.$.appTabs.selectTab(0);
+            }
+            return;
+          }
+        },
+
+        _resetFromBrowse (message) {
+          Editor.Dialog.messageBox({
+            type: 'warning',
+            buttons: [Editor.T('MESSAGE.ok')],
+            title: Editor.T('MESSAGE.dashboard.title'),
+            message: Editor.T('MESSAGE.dashboard.browse_failed'),
+            detail: message,
+            noLink: true,
+          });
+          // jump back to help if cancel from browse project dialog
+          this.$.appTabs.selectTab(0);
+        },
+
+        _onTabChanged ( event ) {
+          this.$.appTabs.selectTab(event.detail.index);
+          this._onSelect(event);
+        },
+
+        _recentProject ( idx ) {
+          return idx === 0;
+        },
+
+        _newProject ( idx ) {
+          return idx === 1;
+        },
+
+        _help ( idx ) {
+          return idx === 3;
+        },
+
+        _getStarted ( idx ) {
+          return idx === 4;
+        },
+
+        _onStatusChanged ( event ) {
+          this.set('status', event.detail.status);
+          this.set('statusType', event.detail.type);
+        },
+
+        _onProjectChanged ( event ) {
+          this.set('projectPath', event.detail.path);
+          if (event.detail.error) {
+            this.set('status', event.detail.error);
+            this.set('statusType', 'error');
+          }
+        },
+
+        _onMinimize (event) {
+          Editor.Ipc.sendToMain('app:window-minimize');
+        },
+
+        _onMaximize (event) {
+          Editor.Ipc.sendToMain('app:window-maximize');
+        },
+
+        _onClose (event) {
+          Editor.Ipc.sendToMain('app:window-close');
+        }
+      });
+    })();
+  </script>
+</dom-module>

@@ -1,0 +1,116 @@
+<!--<link rel="import" href="packages://ui-kit/widget/progress/progress.html">-->
+<link rel="import" href="packages://ui-kit/widget/button/button.html">
+    <dom-module id="auto-update" >
+        <style>
+            .wrap {
+                padding: 20px;
+            }
+
+            .changelog {
+                padding: 1px 5px;
+                border: 1px solid #171717;
+                overflow-x: auto;
+                overflow-y: auto;
+                box-shadow: inset 0 0 8px 2px rgba(0,0,0,0.2);
+                background: #333;
+                margin-top: 1em;
+                margin-bottom: 2em;
+                min-height: 200px;
+                max-height: 300px;
+            }
+
+            .changelog ul {
+                list-style: none;
+            }
+
+            #progress {
+                margin-top: 1em;
+                margin-bottom: 1em;
+            }
+
+            .btn {
+                margin-right: 10px;
+            }
+
+            .error {
+                color: red;
+            }
+        </style>
+    <template>
+        <div class="wrap">
+            <h1>[[_T('DOWNLOADER.title')]]</h1>
+            <h2 hidden=[[!_hideError]]>[[releaseName]]</h2>
+            <div class='changelog' hidden=[[!_hideError]]>
+                <h3>[[_T('DOWNLOADER.changelog')]]</h3>
+                <pre>[[releaseNotes]]</pre>
+                <template is='dom-if' if="[[isHotUpdate]]">
+                    <h3>[[_T('DOWNLOADER.hotupdate_instruction')]] </h3>
+                    <ul>
+                    <template is='dom-repeat' items='[[hotUpdateFiles]]'>
+                        <li>[[item]]</li>
+                    </template>
+                    </ul>
+                </template>
+            </div>
+            <div class="download-path">
+                <h3>[[downloadTarget]]</h3>
+                <p>[[downloadDetail]]</p>
+            </div>
+            <div class="layout horizontal center" hidden=[[!_hideError]]>
+                <editor-button class="btn green" on-click="_install">
+                    [[_T('DOWNLOADER.install')]]
+                </editor-button>
+                <editor-button class="btn normal" on-click="_cancelInstall">
+                    [[_T('DOWNLOADER.cancel')]]
+                </editor-button>
+            </div>
+            <p hidden=[[_hideError]]>[[_T('DOWNLOADER.detail')]]</p>
+            <p class='error' hidden=[[_hideError]]>[[_T('DOWNLOADER.error')]] [[error]]</p>
+        </div>
+    </template>
+
+
+
+    <script type="text/javascript">
+        (() => {
+            'use strict';
+
+            Polymer({
+                is: 'auto-update',
+
+                ready: function () {
+                    Editor.Ipc.sendToMain ( 'dashboard:query-update-info', ( err, opts ) => {
+                        if (err) {
+                            this._hideError = false;
+                        } else {
+                            this._hideError = true;
+                            this.releaseName = opts.releaseName;
+                            this.releaseNotes = opts.releaseNotes;
+                            this.downloadedPath = opts.downloadedPath;
+                            this.downloadTarget = Editor.T('DOWNLOADER.download_target', {downloadedPath: [[this.downloadedPath]]});
+                            this.hotUpdateFiles = opts.hotUpdateFiles;
+                            this.isHotUpdate = this.hotUpdateFiles.length > 0 ? true : false;
+                            this.downloadDetail = this.isHotUpdate ? Editor.T('DOWNLOADER.detail') : Editor.T('DOWNLOADER.hotupdate_instruction');
+                        }
+                    });
+                },
+
+                _T: function (text_id) {
+                    return Editor.T(text_id);
+                },
+
+                _install: function () {
+                    if (this.isHotUpdate) {
+                        Editor.Ipc.sendToMain('dashboard:install-hotupdate');
+                    } else {
+                        Editor.Ipc.sendToMain('dashboard:install-update');    
+                    }
+                },
+
+                _cancelInstall: function () {
+                    Editor.Ipc.sendToMain('dashboard:cancel-update');
+                }
+            });
+        })();
+    </script>
+    </dom-module>

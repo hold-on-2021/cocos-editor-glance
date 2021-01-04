@@ -1,0 +1,16 @@
+<dom-module id="app-navbar" >
+  <link rel="import" type="css" href="styles/app-navbar.css">
+
+  <template>
+    <!-- <span flex-1></span> -->
+    <dashboard-button class="square search"><img src="../static/img/search-icon.png" alt="search"></dashboard-button>
+    <input placeholder="Search (Todo)"></input>
+    <img class="avatar" on-error="_onAvatarError" src="../static/img/avatar.jpg">
+  </template>
+
+  <script>
+    Polymer({
+      is: 'app-navbar'
+    });
+  </script>
+</dom-module>

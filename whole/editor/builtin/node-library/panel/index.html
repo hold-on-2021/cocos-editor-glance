@@ -1,0 +1,120 @@
+<div class="node-library" v-init="local.data.user">
+  <header>
+    <tab :tabindex="tabindex" :toggletab="toggletab" :tabs="tabContents"></tab>
+  </header>
+  <!-- 控件部分 -->
+  <div v-for="(index, content) in tabContents" :key="content.name" v-show="tabindex === index">
+    <tab-item
+      :size="size"
+      :local="local"
+      :modify="content.modify"
+      :classify="content.classify"
+      :popclickobj="popclickobj"
+      :matchid="tabindex === index ? matchid : ''"
+    />
+  </div>
+
+  <footer>
+    <ui-slider :value="size" min="1" max="5" precision="0" @change="onChangeSize"></ui-slider>
+  </footer>
+</div>
+
+<style>
+  /* index.html */
+  :host {
+    background: #333;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .node-library {
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .tab-content {
+    display: block;
+    box-sizing: border-box;
+    min-height: 100%;
+    padding: 20px 20px 40px;
+  }
+
+  footer {
+    box-sizing: border-box;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+
+    padding-right: 20px;
+    text-align: right;
+    background: #474747;
+  }
+
+  /* tab 切换按钮 */
+  .tab-wrap {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+
+    width: 100%;
+
+  }
+
+  .tab-button {
+    flex: 1;
+    border: 1px solid #212121;
+    box-shadow: inset 0 0 8px 2px rgba(0,0,0,0.2);
+    border-right: none;
+    text-align: center;
+    border-radius: 2px;
+    background: #333;
+    list-style: none;
+    line-height: 31px;
+  }
+
+  .tab-button.on {
+    border-bottom: none;
+    position: relative;
+    top: -1px;
+    box-shadow: inset 0 6px 10px -3px rgba(0,0,0,0.2);
+  }
+
+  /* tab-item 内容区域 */
+
+  .tab-item-content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  /* prefab */
+  .prefab {
+    position: relative;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .prefab-thumbnail {
+    padding: 8px;
+  }
+
+  .prefab-thumbnail > img {
+    width: 100%;
+  }
+
+  .prefab input {
+    display: block;
+    
+    margin-bottom: 8px;
+    width: 100%;
+    color: #aaa;
+    background: none;
+    border: none;
+    text-align: center;
+    line-height: 24px;
+    font-family: "微软雅黑", "Microsoft YaHei";
+    font-size: 12px;
+  }
+</style>

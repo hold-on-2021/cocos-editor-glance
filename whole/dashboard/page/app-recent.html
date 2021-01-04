@@ -1,0 +1,183 @@
+<dom-module id="app-recent" >
+  <link rel="import" type="css" href="styles/app-recent.css">
+
+  <template>
+    <template is="dom-if" if="{{!list.length}}">
+      <div class="new-project fit">
+        <span>[[_T('DASHBOARD.create_project_hint')]]</span>
+        <dashboard-button
+          class="flat"
+          no-focus
+          disabled$="{{!_hideErrorInfo(item.error)}}"
+          on-click="_onNewProject"
+          >
+        [[_T('DASHBOARD.new_project')]]
+        </dashboard-button>
+      </div>
+    </template>
+    <iron-selector id="selector"
+      selected-class="selected"
+      on-selected-changed="_onSelectedChanged"
+    >
+      <template is="dom-repeat" id="list" items="{{list}}">
+        <div class="project layout vertical" on-mouseenter="_onHover">
+          <div class="logo">
+            <img src$="{{_getCocosLogo()}}"></img>
+            <div class="btn-group overlay">
+              <div class="btn-anchor">
+                <dashboard-button class="corner transparent"
+                  no-focus
+                  on-click="_onClose"
+                >[[_T('SHARED.close')]]</dashboard-button>
+                <dashboard-button
+                  class="flat"
+                  no-focus
+                  disabled$="{{!_hideErrorInfo(item.error)}}"
+                  on-click="_onOpen"
+                >[[_T('SHARED.open')]]</dashboard-button>
+              </div>
+            </div>
+          </div>
+          <div class="name">
+            <div class$="{{_getItemNameClass(item)}}">{{item.name}}</div>
+          </div>
+        </div>
+      </template>
+    </iron-selector>
+  </template>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const Path = require('fire-path');
+      const _ = require('lodash');
+      const Electron = require('electron');
+      const ipcRenderer = Electron.ipcRenderer;
+
+      Polymer({
+        is: 'app-recent',
+
+        behaviors: [ Editor.UI.Droppable ],
+
+        hostAttributes: {
+          'droppable': 'file',
+          'single-drop': true,
+        },
+
+        listeners: {
+          'drop-area-enter': '_onDropAreaEnter',
+          'drop-area-leave': '_onDropAreaLeave',
+          'drop-area-accept': '_onDropAreaAccept',
+        },
+
+        ready () {
+          this._initDroppable(this);
+          this._queryRecent();
+
+          ipcRenderer.on( 'dashboard:refresh-recent-project', (event) => {
+            this._queryRecent();
+            this.fire( 'tab-changed', { index: 0 } );
+          });
+        },
+
+        _queryRecent () {
+          Editor.Ipc.sendToMain('app:query-recent', (err, results) => {
+            if (err) {
+              Editor.error( err.message );
+            }
+            this.list = results;
+          });
+        },
+
+        _T: function (text_id) {
+          return Editor.T(text_id);
+        },
+
+        _getItemNameClass ( item ) {
+          return 'name ' + (item.error ? 'error' : '');
+        },
+
+        _getCocosLogo ( name ) {
+          return Editor.url('app://dashboard/static/img/cocos_logo.png');
+        },
+
+        _hideErrorInfo ( error ) {
+          return (error === undefined ? true : false);
+        },
+
+        _onOpen ( event ) {
+          var model = this.$.list.modelForElement(event.target);
+          Editor.Ipc.sendToMain('app:open-project', model.item.path, err => {
+            if (err) {
+              this.fire( 'status-changed', {
+                type: 'error',
+                status: err.message,
+              });
+            }
+          });
+        },
+
+        _onClose ( event ) {
+          let model = this.$.list.modelForElement(event.target);
+          let idx = _.findIndex( this.list, item => {
+            return item === model.item;
+          });
+          this.splice( 'list', idx, 1 );
+          Editor.Ipc.sendToMain('app:close-project', model.item.path );
+        },
+
+        _onHover ( event ) {
+          event.stopPropagation();
+          let model = this.$.list.modelForElement(event.target);
+          if ( model ) {
+            this.fire( 'project-changed', {
+              path: model.item.path,
+              error: model.item.error
+            });
+          }
+        },
+
+        _onNewProject ( event ) {
+          event.stopPropagation();
+          this.fire( 'tab-changed', { index: 1 } );
+        },
+
+        _onDropAreaEnter ( event ) {
+          event.stopPropagation();
+          this.classList.add('highlight');
+        },
+
+        _onDropAreaLeave ( event ) {
+          event.stopPropagation();
+          this.classList.remove('highlight');
+        },
+
+        _onDropAreaAccept ( event ) {
+          event.stopPropagation();
+          this.classList.remove('highlight');
+
+          event.detail.dragItems.forEach( path => {
+            Editor.Ipc.sendToMain('app:open-project', path, err => {
+              this.fire( 'status-changed', {
+                type: 'error',
+                status: err.message,
+              } );
+            });
+          });
+        },
+
+        _onSelectedChanged ( event ) {
+          let itemEL = Polymer.dom(this.$.selector).children[event.detail.value];
+          let model = this.$.list.modelForElement(itemEL);
+          if ( model ) {
+            this.fire( 'project-changed', {
+              path: model.item.path,
+              error: model.item.error
+            } );
+          }
+        }
+      });
+    })();
+  </script>
+</dom-module>

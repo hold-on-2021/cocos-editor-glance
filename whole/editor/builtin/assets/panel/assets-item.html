@@ -1,0 +1,60 @@
+<dom-module id="assets-item">
+  <link rel="import" type="css" href="packages://ui-tree/widget/tree-item.css">
+  <link rel="import" type="css" href="theme://globals/fontello.css">
+
+  <template>
+    <style>
+      :host[conflicted] > #bar {
+        background-color: #cc0;
+      }
+
+      :host[conflicted] > #header > .wrapper {
+        color: black;
+      }
+
+      :host[highlighted] > #header {
+        background-color: #c7722c;
+      }
+
+      :host[highlighted] > #header > .wrapper {
+        color: black;
+        font-weight: bold;
+      }
+
+      :host[invalid] > #header {
+        background-color: #f00;
+      }
+
+      :host[invalid] > #header > .wrapper {
+        color: black;
+        font-weight: bold;
+      }
+    </style>
+
+    <div id="bar"
+      ></div>
+    <div id="header"
+      >
+      <div class="wrapper">
+        <i id="foldIcon" class$="{{_foldIconClass(folded)}}"
+          on-mousedown="_onFoldMouseDown"
+          on-click="_onFoldClick"
+          on-dblclick="_onFoldDblClick"
+        ></i>
+        <div id="icon" draggable="false"
+          on-mouseenter="_onIconMouseEnter"
+          on-mouseleave="_onIconMouseLeave"
+        ></div>
+        <span id="name" class$="{{_nameClass(name)}}"
+          on-click="_onNameClick"
+          >{{_nameText(name)}}</span>
+        <i id="readonly" class="icon-lock" hidden="{{!readonly}}"></i>
+      </div>
+    </div>
+    <div id="content">
+      <content></content>
+    </div>
+  </template>
+
+  <script type="text/javascript" src="assets-item.js"></script>
+</dom-module>

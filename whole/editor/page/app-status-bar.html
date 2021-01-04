@@ -1,0 +1,104 @@
+<dom-module id="app-status-bar" >
+  <template>
+    <style>
+      :host {
+        @apply(--layout-horizontal);
+
+        align-items: center;
+
+        position: relative;
+        box-sizing: border-box;
+        font-size: 12px;
+        font-weight: bold;
+
+        height: 20px;
+        margin: 5px 5px 0px;
+      }
+
+      .version {
+        color: #f90;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+
+      .group {
+        @apply(--layout-horizontal);
+
+        border-right: 1px solid #888;
+        margin-right: 10px;
+      }
+
+      i {
+        margin-right: 10px;
+      }
+
+      i.red {
+        color: #900;
+      }
+
+      i.green {
+        color: #0f0;
+      }
+
+      i.orange {
+        color: #f90;
+      }
+
+      i.gray {
+        color: #888;
+      }
+
+      .console {
+        align-items: baseline;
+        padding-right: 10px;
+        overflow: hidden;
+      }
+
+      .console.error, .console.failed {
+        color: #c80c0c;
+      }
+
+      .console.warn {
+        color: #990;
+      }
+
+      .console i {
+        margin-right: 5px;
+      }
+
+      .console-wrap {
+        display: flex;
+        max-width: 100%;
+      }
+
+      .console-text {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .console-text:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    </style>
+
+    <div class="group">
+      <i class$="[[_compilerState(compilerState)]]" title$="[[_compilerTitle(compilerState)]]"></i>
+      <i class$="[[_dbState(dbState)]]" title$="[[_dbTitle(dbState)]]"></i>
+      <i class$="[[_dbWatchState(dbWatchState)]]" title$="[[_dbWatchTitle(dbWatchState)]]"></i>
+    </div>
+
+    <div class$="group console flex-1 [[consoleLog.type]]" on-click="_onClickLog">
+      <div class="flex-1"></div>
+      <div class="console-wrap">
+        <i class$="[[_logType(consoleLog.type)]]"></i>
+        <div class="console-text">[[_logText(consoleLog.text)]]</div>
+      </div>
+    </div>
+
+    <span class="version">{{version}}</span>
+  </template>
+
+  <script type="text/javascript" src="app-status-bar.js"></script>
+</dom-module>

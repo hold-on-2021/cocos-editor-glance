@@ -1,0 +1,147 @@
+<dom-module id="app-help" >
+  <style>
+    :host {
+      @apply(--layout-horizontal);
+      margin-left:10%;
+      margin-top:10%;
+    }
+
+    .content {
+      padding-left: 80px;
+      color: #C0C0C0;
+      width: 500px;
+    }
+
+    .content ul {
+      list-style: none;
+      margin-bottom: 50px;
+    }
+
+    .content a {
+      text-decoration: none;
+      color: #cc6454;
+    }
+
+    .content a:hover {
+      color: #df7767;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .logo .version {
+      font-size: 1.5rem;
+      margin-left:auto;
+      margin-right:auto;
+      margin-top: 10px;
+    }
+  </style>
+
+  <template>
+    <div class="logo layout vertical">
+      <img src="../static/img/logo_vertical.png" width="150px" alt="Cocos Creator Logo">
+      <div class="version"><span>Ver.</span>{{_ver}}</div>
+    </div>
+    <div class="content">
+      <p>[[_T('DASHBOARD.help.intro')]]</p>
+      <ul>
+        <li><a href="#" on-click="_onRecent">[[_T('DASHBOARD.help.link_recent')]]</a></li>
+        <li><a href="#" on-click="_onNew">[[_T('DASHBOARD.help.link_new')]]</a></li>
+        <li><a href="#" on-click="_onBrowse">[[_T('DASHBOARD.help.link_browse')]]</a></li>
+      </ul>
+
+      <p>[[_T('DASHBOARD.help.resource')]]</p>
+      <ul>
+        <li><a href="#" on-click="_onTutorial">[[_T('DASHBOARD.help.link_tutorial')]]</a></li>
+        <li><a href="#" on-click="_onManual">[[_T('DASHBOARD.help.link_manual')]]</a></li>
+        <li><a href="#" on-click="_onAPIDoc">[[_T('DASHBOARD.help.link_api')]]</a></li>
+      </ul>
+      <p>[[_T('DASHBOARD.help.demo')]]</p>
+      <ul>
+        <li><a url="https://github.com/cocos-creator/example-cases" on-click="_openExternal">[[_T('DASHBOARD.help.demo_example')]]</a></li>
+        <li><a url="https://github.com/cocos-creator/tutorial-first-game" on-click="_openExternal">[[_T('DASHBOARD.help.demo_first_game')]]</a></li>
+        <li><a url="https://github.com/cocos-creator/tutorial-blackjack" on-click="_openExternal">[[_T('DASHBOARD.help.demo_blackjack')]]</a></li>
+      </ul>
+    </div>
+
+  </template>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const Electron = require('electron');
+
+      Polymer({
+        is: 'app-help',
+
+        ready () {
+          this._ver = Editor.remote.versions['CocosCreator'];
+        },
+
+        _T: function(text_id) {
+          return Editor.T(text_id);
+        },
+
+        _onRecent () {
+          this.fire( 'tab-changed', { index: 0 } );
+        },
+
+        _onNew () {
+          this.fire( 'tab-changed', { index: 1 } );
+        },
+
+        _onBrowse () {
+          const dialog = Electron.remote.dialog;
+
+          let result = dialog.showOpenDialog ( {
+            title: Editor.T('DASHBOARD.choose_project'),
+            properties: [ 'openDirectory' ]
+          } );
+
+          if ( result ) {
+            Editor.Ipc.sendToMain('app:open-project', result[0], err => {
+              this.fire( 'status-changed', {
+                type: 'error',
+                status: err.message,
+              } );
+            });
+          }
+          return;
+        },
+
+        _openExternal (event) {
+          let url = event.target.getAttribute('url');
+          Electron.remote.shell.openExternal(url);
+        },
+
+        _onTutorial () {
+          Editor.Ipc.sendToMain('app:open-manual-doc', true, err => {
+            if (err) {
+              this.fire( 'status-changed', { type: 'error', status: err.message, } ); 
+            }
+          });
+        },
+
+        _onManual () {
+          Editor.Ipc.sendToMain('app:open-manual-doc', err => {
+            if (err) {
+              this.fire( 'status-changed', { type: 'error', status: err.message, } );
+            }
+          });
+        },
+
+        _onAPIDoc () {
+          Editor.Ipc.sendToMain('app:open-api-doc', err => {
+            if (err) {
+              this.fire( 'status-changed', { type: 'error', status: err.message, } );
+            }
+          });
+        },
+
+        _onGetStarted () {
+          this.fire( 'tab-changed', { index: 4 } );
+        }
+      });
+    })();
+  </script>
+</dom-module>

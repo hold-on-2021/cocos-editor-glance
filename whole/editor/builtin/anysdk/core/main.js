@@ -1,0 +1,1 @@
+"use strict";module.exports={load(){},unload(){},messages:{open(){Editor.User.isLoggedIn(function(e,n,o){1==e?Editor.Panel.open("anysdk"):(Editor.warn("启动AnySDK失败，原因："+o+" 请确保网络连接正常,帐号处于登陆状态。"),Editor.Panel.close("anysdk"))}),Editor.Metrics.trackEvent({category:"AnySDK",action:"Open",label:"new metrics"})},"app:sign-out"(){Editor.Panel.close("anysdk")}}};

@@ -1,0 +1,156 @@
+<link rel="import" href="app-play-buttons.html">
+
+<dom-module id="app-top-bar" >
+  <template>
+    <style>
+      :host {
+        @apply(--layout-horizontal);
+        height: 35px;
+        margin-bottom: 3px;
+      }
+
+      .fa-folder-open {
+        color: #0af;
+        font-size: 15px;
+        font-weight: bold;
+      }
+
+      .label {
+        font-size: 12px;
+        font-weight: bold;
+        color: #090;
+      }
+
+      .label::selection {
+        background-color: #007acc;
+      }
+
+      .select {
+        user-select: text;
+        -webkit-user-select: text;
+      }
+
+      .fa-wifi {
+        margin-left: 5px;
+        margin-right: 5px;
+        font-size: 20px;
+
+        color: #090;
+      }
+
+      .disabled {
+        color: grey;
+      }
+
+      .group > * {
+        margin-right: 5px;
+      }
+
+      .group > *:last-child {
+        margin-right: 0px;
+      }
+
+      .qrcode-black-box {
+        display: flex;
+        position: absolute;
+        top: 40px;
+        right: 120px;
+        width: 200px;
+        padding: 15px 0px;
+        background-color: white;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        border-radius: 3px;
+      }
+
+      .qrcode-tip-label {
+        color: #404040;
+      }
+
+      .qrcode-white-box {
+        width: 180px;
+        background-color: white;
+        justify-content: center;
+        align-items: center;
+      }
+
+    </style>
+
+    <div class="group flex-1 layout horizontal end">
+      <editor-buttons class="small" attr-for-selected="name"
+        selected="{{transformTool}}"
+      >
+        <editor-buttons-item name="move" title="[[_T('SCENE.translate_gizmo')]]">
+          <i class="fa fa-arrows"></i>
+        </editor-buttons-item>
+        <editor-buttons-item name="rotate" title="[[_T('SCENE.rotate_gizmo')]]">
+          <i class="fa fa-refresh"></i>
+        </editor-buttons-item>
+        <editor-buttons-item name="scale" title="[[_T('SCENE.scale_gizmo')]]">
+          <i class="fa fa-arrows-alt"></i>
+        </editor-buttons-item>
+        <editor-buttons-item name="rect" title="[[_T('SCENE.rect_gizmo')]]">
+          <i class="fa fa-object-group"></i>
+        </editor-buttons-item>
+      </editor-buttons>
+
+      <editor-buttons class="small" attr-for-selected="name"
+        selected="{{pivot}}"
+      >
+        <editor-buttons-item name="pivot" title="[[_T('SCENE.pivot')]]">
+          <img src="../static/img/tools-pivot.png">
+        </editor-buttons-item>
+        <editor-buttons-item name="center" title="[[_T('SCENE.center')]]">
+          <img src="../static/img/tools-center.png">
+        </editor-buttons-item>
+      </editor-buttons>
+
+      <editor-buttons class="small" attr-for-selected="name"
+        selected="{{coordinate}}"
+      >
+        <editor-buttons-item name="local" title="[[_T('SCENE.local_gizmo')]]">
+          <img src="../static/img/tools-local.png">
+        </editor-buttons-item>
+        <editor-buttons-item name="global" title="[[_T('SCENE.global_gizmo')]]">
+          <img src="../static/img/tools-global.png">
+        </editor-buttons-item>
+      </editor-buttons>
+    </div>
+
+    <div class="flex-none layout horizontal center center-justified">
+      <app-play-buttons id="playButtons"></app-play-buttons>
+    </div>
+
+    <div class="group flex-1 layout horizontal center end-justified">
+      <div on-mouseenter="_showQrcode" on-mouseleave="_hideQrcode">
+        <span class="label select">[[previewURL]]</span>
+        <i class$="fa fa-wifi [[wifiState]]"></i>
+      </div>
+      <editor-label title="[[_T('EDITOR_MAIN.connected_count')]]" class="mini orange">[[connectedCount]]</editor-label>
+
+      <ui-button on-confirm="_onProject" title="[[_T('EDITOR_MAIN.open_project')]]">
+        <i class="fa fa-folder-open"></i>
+        [[_T('EDITOR_MAIN.open_project_button')]]
+      </ui-button>
+
+      <ui-button on-confirm="_onApp" title="[[_T('EDITOR_MAIN.open_project')]]">
+        <i class="fa fa-folder-open"></i>
+        [[_T('EDITOR_MAIN.open_app_button')]]
+      </ui-button>
+    </div>
+
+    <div id="qrView" class="qrcode-black-box layout vertical" hidden>
+      <div class="qrcode-white-box layout vertical">
+        <p style = "margin:3px"></p>
+        <div id="qrcode"></div>
+        <p style = "margin:5px"></p>
+        <span class="qrcode-tip-label">[[_T('EDITOR_MAIN.preview_url')]]</span>
+      </div>
+    </div>
+
+  </template>
+
+  <script type="text/javascript" src="qrcode.js"></script>
+  <script type="text/javascript" src="app-top-bar.js"></script>
+</dom-module>

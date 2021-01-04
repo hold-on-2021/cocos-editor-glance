@@ -1,0 +1,20 @@
+<dom-module id="svg-gizmos-view">
+  <template>
+    <style>
+      :host {
+        overflow: hidden;
+        position: relative;
+      }
+
+      svg {
+        shape-rendering: geometricPrecision;
+      }
+    </style>
+
+    <div id="view" class="fit">
+      <svg id="svg"></svg>
+    </div>
+  </template>
+
+  <script type="text/javascript" src="svg-gizmos-view.js"></script>
+</dom-module>

@@ -1,0 +1,55 @@
+<link rel="import" href="packages://ui-kit/widget/index.html">
+<link rel="import" href="assets-tree.html">
+
+<dom-module id="editor-assets">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-vertical);
+      }
+
+      .path {
+        font-weight: bold;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .tree-view {
+        position: relative;
+      }
+    </style>
+
+    <editor-toolbar>
+      <editor-button title="[[_T('ASSETS.create_tooltip')]]" id="createBtn" on-click="_onCreateClick">
+        <i class="fa fa-plus"></i>
+      </editor-button>
+      <editor-input
+        id="search"
+        class="flex-1"
+        input-value="{{searchPattern}}"
+        title="[[_T('ASSETS.search_tooltip')]]"
+        placeholder="[[_T('SHARED.search')]]..."
+        on-confirm="_onSearchConfirm"
+        on-clear="_onClear"
+        cancelable
+      >
+      </editor-input>
+    </editor-toolbar>
+
+    <div class="tree-view flex-1">
+      <assets-tree id="tree" class="fit" droppable="file,asset,node"></assets-tree>
+      <assets-tree id="searchResult" class="fit" droppable="" hidden></assets-tree>
+      <editor-loader id="loader" hidden
+        text="[[_T('SHARED.loading')]]"
+        mask
+      >
+      </editor-loader>
+    </div>
+
+    <editor-toolbar>
+      <span class="path flex-1">{{activeItemUrl}}</span>
+    </editor-toolbar>
+  </template>
+
+  <script type="text/javascript" src="panel.js"></script>
+</dom-module>
